@@ -13,6 +13,22 @@
 
   var global = typeof window !== 'undefined' ? window : windowStub;
 
+  // stub for environments with no document object, like server-side rendering
+  var documentStub = {
+    cookie: '',
+    createElement: function() {},
+    body: {
+      appendChild: function() {},
+      insertBefore: function() {},
+    },
+    head: {
+      appendChild: function() {},
+    },
+    firstChild: null,
+  };
+
+  var env = typeof document !== 'undefined' ? document : documentStub;
+
   // stop from running again, if accidently included more than once.
   if (cc.hasInitialised) return;
 
@@ -49,7 +65,7 @@
     },
 
     getCookie: function(name) {
-      var value = '; ' + document.cookie;
+      var value = '; ' + env.cookie;
       var parts = value.split('; ' + name + '=');
       return parts.length < 2
         ? undefined
@@ -75,7 +91,7 @@
       if (secure) {
         cookie.push('secure');
       }
-      document.cookie = cookie.join(';');
+      env.cookie = cookie.join(';');
     },
 
     // only used for extending the initial options
@@ -193,7 +209,7 @@
 
   // detects the `transitionend` event name
   cc.transitionEnd = (function() {
-    var el = document.createElement('div');
+    var el = env.createElement('div');
     var trans = {
       t: 'transitionend',
       OT: 'oTransitionEnd',
@@ -818,11 +834,11 @@
 
     function appendMarkup(markup) {
       var opts = this.options;
-      var div = document.createElement('div');
+      var div = env.createElement('div');
       var cont =
         opts.container && opts.container.nodeType === 1
           ? opts.container
-          : document.body;
+          : env.body;
 
       div.innerHTML = markup;
 
@@ -974,8 +990,8 @@
       }
 
       // this will be interpretted as CSS. the key is the selector, and each array element is a rule
-      var style = document.createElement('style');
-      document.head.appendChild(style);
+      var style = env.createElement('style');
+      env.head.appendChild(style);
 
       // custom style doesn't exist, so we create it
       cc.customStyles[hash] = {
@@ -1501,7 +1517,7 @@
 
     function getScript(url, callback, timeout) {
       var timeoutIdx,
-        s = document.createElement('script');
+        s = env.createElement('script');
 
       s.type = 'text/' + (url.type || 'javascript');
       s.src = url.src || url;
@@ -1520,7 +1536,7 @@
         }
       };
 
-      document.body.appendChild(s);
+      env.body.appendChild(s);
 
       // You can't catch JSONP Errors, because it's handled by the script tag
       // one way is to use a timeout
