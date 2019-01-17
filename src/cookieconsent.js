@@ -16,7 +16,13 @@
   // stub for environments with no document object, like server-side rendering
   var documentStub = {
     cookie: '',
-    createElement: function() {},
+    createElement: function() {
+      return {
+        style: {},
+        addEventListener: function() {},
+        removeEventListener: function() {},
+      };
+    },
     body: {
       appendChild: function() {},
       insertBefore: function() {},
